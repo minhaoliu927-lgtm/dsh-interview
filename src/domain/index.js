@@ -1,5 +1,6 @@
 import { openStore } from './store.js';
 import { createRealtimeLedger } from './realtime.js';
+import { createReceiptLedger, RECEIPT_SYNC_ACTIONS } from './receipts.js';
 import { id, now, hash, fail, object, text, label, optionalText, integer, choice, list, evidence,
   scoredCriteria, totalScore, RESUME_RUBRIC, FIT_RUBRIC, INTERVIEW_RUBRIC,
   EVIDENCE_INSTRUCTIONS, SCORING_INSTRUCTIONS } from './validation.js';
@@ -85,7 +86,8 @@ export function createCareerService({ directory, generate }) {
     return interview(value.id);
   }
   function state() {
-    return { schemaVersion: 3,
+    return { schemaVersion: 4, receipts: receipts.list(),
+      deskConversations: db.prepare('SELECT object_kind AS kind,object_id AS id,session_id AS sessionId FROM desk_conversations ORDER BY object_kind,object_id').all(),
       materials: db.prepare('SELECT id FROM materials ORDER BY created_at DESC,id').all().map(row => material(row.id)),
       goals: db.prepare('SELECT id FROM goals ORDER BY created_at DESC,id').all().map(row => goal(row.id)),
       conversations: db.prepare('SELECT * FROM conversations ORDER BY created_at DESC,id').all().map(conversation),
@@ -148,7 +150,8 @@ export function createCareerService({ directory, generate }) {
     const sessionId = label(input.sessionId, 200);
     const goalId = input.goalId ?? null;
     const target = goalId !== null ? goal(goalId, true) : null;
-    const selected = input.versionId ? resume(input.versionId) : null;
+    if (input.versionId && input.contextVersionId && input.versionId !== input.contextVersionId) fail('CONVERSATION_CONTEXT_MISMATCH');
+    const selected = input.contextVersionId ? version(input.contextVersionId, true) : input.versionId ? resume(input.versionId) : null;
     const kind = choice(input.kind ?? 'chat', ['chat', 'interview']);
     if (kind === 'interview' && goalId === null) fail('GOAL_REQUIRED');
     const prior = db.prepare('SELECT * FROM conversations WHERE session_id=?').get(sessionId);
@@ -156,7 +159,7 @@ export function createCareerService({ directory, generate }) {
       if (prior.kind !== kind || (prior.goal_id !== null && prior.goal_id !== goalId)) fail('CONVERSATION_GOAL_IMMUTABLE');
       if (prior.context_state !== 'frozen') fail('CONVERSATION_CONTEXT_LEGACY', '旧会话没有保存资料版本，请新建对话选择资料');
       const refs = db.prepare('SELECT version_id,kind FROM conversation_materials WHERE conversation_id=?').all(prior.id);
-      if (selected && refs.some(ref => ref.kind === 'resume' && ref.version_id !== selected.id)) fail('CONVERSATION_CONTEXT_IMMUTABLE');
+      if (selected && refs.some(ref => ref.kind === selected.kind && ref.version_id !== selected.id)) fail('CONVERSATION_CONTEXT_IMMUTABLE');
       if (prior.goal_id === null && goalId !== null) {
         const attach = () => {
           db.prepare('UPDATE conversations SET goal_id=?,goal_snapshot_json=? WHERE id=?').run(goalId, json({ id: target.id, title: target.title, company: target.company }), prior.id);
@@ -178,7 +181,7 @@ export function createCareerService({ directory, generate }) {
   function freezeConversation(conversationId, target, selected, existing = []) {
     const knownKinds = new Set(existing.map(row => row.kind));
     const choices = new Map((target?.materialLinks ?? []).map(link => [link.kind, version(link.versionId, true)]));
-    if (selected) choices.set('resume', selected);
+    if (selected) choices.set(selected.kind, selected);
     for (const [kind, source] of choices) {
       if (knownKinds.has(kind)) continue;
       db.prepare('INSERT INTO conversation_materials(conversation_id,version_id,kind) VALUES(?,?,?)').run(conversationId, source.id, kind);
@@ -515,11 +518,12 @@ export function createCareerService({ directory, generate }) {
     });
   }
 
-  async function execute(action, input, options) {
+  function execute(action, input, options) {
     if (closed) fail('SERVICE_CLOSED');
     object(input); aborted(options.signal);
     switch (action) {
       case 'state': return state();
+      case 'receipt.undo': return receipts.undo(input);
       case 'material.add': return store.transaction(() => {
         const materialId = id(), title = label(input.title), kind = choice(input.kind, ['resume', 'job', 'company', 'experience']);
         db.prepare('INSERT INTO materials(id,title,kind,created_at) VALUES(?,?,?,?)').run(materialId, title, kind, now());
@@ -557,6 +561,22 @@ export function createCareerService({ directory, generate }) {
         return goal(target.id);
       }
       case 'conversation.link': return linkConversation(input);
+      case 'conversation.bindObject': {
+        const kind = choice(input.kind, ['material', 'goal', 'assessment', 'rewrite', 'report']);
+        const context = conversationContext({ sessionId: input.sessionId });
+        if (context.kind !== 'chat' || (options.sessionId && options.sessionId !== input.sessionId)) fail('CONVERSATION_SESSION_MISMATCH');
+        if (kind === 'material') {
+          const target = material(input.id);
+          if (!context.materials.some(value => value.materialId === target.id)) fail('CONVERSATION_CONTEXT_MISMATCH');
+        } else if (kind === 'goal') {
+          if (goal(input.id).id !== context.goalId) fail('CONVERSATION_CONTEXT_MISMATCH');
+        } else {
+          const target = artifact(input.id, kind);
+          if ((target.goalId || null) !== context.goalId || !context.materials.some(value => value.id === target.versionId)) fail('CONVERSATION_CONTEXT_MISMATCH');
+        }
+        db.prepare('INSERT INTO desk_conversations(object_kind,object_id,session_id) VALUES(?,?,?) ON CONFLICT(object_kind,object_id) DO UPDATE SET session_id=excluded.session_id').run(kind, input.id, input.sessionId);
+        return { kind, id: input.id, sessionId: input.sessionId };
+      }
       case 'conversation.context': {
         if (options.sessionId && options.sessionId !== input.sessionId) fail('CONVERSATION_SESSION_MISMATCH');
         return conversationContext(input);
@@ -576,13 +596,20 @@ export function createCareerService({ directory, generate }) {
     }
   }
   const realtime = createRealtimeLedger({ store, interview, saveInterview, taskSnapshots, linkConversation });
+  const receipts = createReceiptLedger({ store, material, version, goal, artifact, addVersion });
   return {
     realtime: Object.fromEntries(Object.entries(realtime).map(([key, method]) => [key, (...args) => {
       if (closed) fail('SERVICE_CLOSED');
       return method(...args);
     }])),
     dispatch(action, input = {}, options = {}) {
-      const operation = execute(action, input, options);
+      const operation = Promise.resolve().then(() => {
+        if (RECEIPT_SYNC_ACTIONS.has(action)) return store.transaction(() => {
+          const before = receipts.capture(action, input);
+          return receipts.record(action, input, execute(action, input, options), before);
+        });
+        return Promise.resolve(execute(action, input, options)).then(result => receipts.record(action, input, result, null));
+      });
       pending.add(operation);
       operation.then(() => pending.delete(operation), () => pending.delete(operation));
       return operation;

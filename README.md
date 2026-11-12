@@ -17,7 +17,7 @@
 
 **职镜AI** 是面向求职者的 DSH 原生插件。个人资料、目标岗位、原生聊天和模拟面试放在同一个工作台，文字分析直接使用 DSH 已配置的模型。
 
-当前版本为 **0.1.0-dev.6 开发预览**，提供源码、自有 DSH 插件索引和 Release `.tgz`。索引使用固定 Git 提交的预构建包，安装不需要 npm 账号；npm 发布暂缓。
+当前版本为 **0.1.0-dev.7 开发预览**，提供源码、自有 DSH 插件索引和 Release `.tgz`。索引使用固定 Git 提交的预构建包，安装不需要 npm 账号；npm 发布暂缓。
 
 ## 可以做什么
 
@@ -57,7 +57,7 @@ https://raw.githubusercontent.com/minhaoliu927-lgtm/dsh-interview-desk/main/inde
 
 ### 从 Release 安装
 
-1. 打开 [GitHub Releases](https://github.com/minhaoliu927-lgtm/dsh-interview-desk/releases)，在 **Assets** 下载 `dsh-interview-desk-0.1.0-dev.6.tgz`。
+1. 打开 [GitHub Releases](https://github.com/minhaoliu927-lgtm/dsh-interview-desk/releases)，在 **Assets** 下载 `dsh-interview-desk-0.1.0-dev.7.tgz`。
 2. 在 DSH 插件管理中选择“添加插件”，将安装包的**绝对路径**填入“包名或地址”，点击“安装”。
 3. 点击“立即启用”，从侧栏打开“职镜”。
 
@@ -70,7 +70,7 @@ GitHub 的 **Source code.zip / tar.gz** 是源码归档，不是插件安装包�
 
 ```powershell
 $env:DSH_HOME = Join-Path (Get-Location) '.runtime/zhijing/dsh'
-dsh plugin --profile interview-test add ./dsh-interview-desk-0.1.0-dev.6.tgz
+dsh plugin --profile interview-test add ./dsh-interview-desk-0.1.0-dev.7.tgz
 dsh --profile interview-test --dump-config
 ```
 
@@ -101,9 +101,19 @@ dsh --profile interview-test --dump-config
 
 ### 工作台与助手并排使用
 
-顶部“助手”可展开或收起原生聊天。在资料、岗位和分析页面可以保留当前对话；打开完整聊天后可返回工作台。窄窗口默认收起助手，需要时再打开。
+顶部按对话、个人资料、目标岗位、模拟面试、报告分区。列表支持搜索、筛选、排序和卡片或列表显示。目标岗位也可切换看板，拖动归档或恢复；同样提供按钮操作。报告页按真实保存的面试成绩显示最近记录。打开资料、岗位或结果后进入对象工作室，左侧是原生助手，右侧是内容；可切换前后对象、专注结果或返回列表，保留筛选和位置。
+
+总览页的助手在右侧，可展开或收起。对象对话与全局对话分开保存，资料和报告讨论继续绑定当时确认的版本；新建对话可选用新版本。展开聊天再返回时草稿保留。窄窗口默认收起助手，需要时再打开。
 
 在资料正文中选择一段文字，或选择一个已确认的完整版本，点击“交给助手”。先核对可取消的引用卡，再点击“加入对话草稿”。引用会追加到当前 DSH 输入框，保留已有草稿和附件；最后仍由你点击原生“发送消息”。选中内容本身不会请求模型，也不会替换旧面试或报告的资料版本。
+
+### 操作记录与撤销
+
+助手旁的操作记录可以打开实际保存的资料、改写或报告。可以撤销仍未被后续操作改变的岗位修改、资料绑定和简历修改；简历撤销会追加一个待核对的恢复版本，不删除历史。已提交的模型请求、报告和原生聊天历史不提供撤销。输入框外可用 Ctrl/Cmd+Z 撤销最近可恢复的操作。
+
+数据库升级到版本 4，保留原有资料、报告和会话，不补造旧操作记录。升级前可在关闭 Host 后备份完整数据目录；旧版无法直接打开升级后的数据库。
+
+安装了 `dsh-better-sidebar` 时，其页面菜单提供第二入口，点击后打开 DSH 主工作区的完整职镜AI工作台。原生会话所需的宿主插槽只在主工作区授权，因此此入口不另建一套聊天。未安装该插件时，官方侧栏入口照常使用。
 
 ## 实时语音面试
 
