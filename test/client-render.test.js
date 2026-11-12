@@ -100,7 +100,7 @@ test('empty workspace renders a usable bilingual home without fabricated sample 
   const { App } = await compile('client/workbench.jsx');
   for (const dictionary of [zh, en]) {
     const html = renderToStaticMarkup(React.createElement(App, { t: translate(dictionary), useCareer: () => ({ data: empty, ready: true, pending: 0 }), useNativeSessions: () => ({ ids: [], byId: {} }), useWorkspaceChoices: () => ({ items: [], phase: 'ready' }), renderSlot: () => null }));
-    assert.ok(html.includes(dictionary.homeTitle));
+    assert.ok(html.includes(dictionary.deskIntro_home));
     assert.ok(html.includes(dictionary.newChat));
     assert.ok(html.includes(dictionary.addMaterial));
     assert.ok(html.includes(dictionary.workspaceRequired));

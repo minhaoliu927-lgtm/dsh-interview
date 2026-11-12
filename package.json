@@ -1,6 +1,6 @@
 {
   "name": "dsh-interview-desk",
-  "version": "0.1.0-dev.6",
+  "version": "0.1.0-dev.7",
   "description": "DSH 原生求职工作台：个人资料、简历分析与修改、文字和语音模拟面试。",
   "type": "module",
   "license": "MIT",

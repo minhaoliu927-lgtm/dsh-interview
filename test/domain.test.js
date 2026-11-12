@@ -88,7 +88,7 @@ test('SQLite materials keep confirmed old versions and cross-goal resume reuse a
     db.exec('PRAGMA foreign_keys=ON');
     assert.throws(() => db.prepare('UPDATE versions SET text=? WHERE id=?').run('tampered', versionId), /immutable_version/u);
     assert.throws(() => db.prepare('INSERT INTO confirmations VALUES(?,?)').run('missing', 'now'), /FOREIGN KEY/u);
-    assert.equal(db.prepare('SELECT COUNT(*) AS count FROM schema_migrations').get().count, 3);
+    assert.equal(db.prepare('SELECT COUNT(*) AS count FROM schema_migrations').get().count, 4);
   } finally { db.close(); }
 });
 
@@ -370,7 +370,7 @@ test('forward v1 migration preserves legacy conversations without inventing hist
   const service = createCareerService({ directory, generate: responder });
   try {
     const state = await service.dispatch('state');
-    assert.equal(state.schemaVersion, 3);
+    assert.equal(state.schemaVersion, 4);
     assert.equal(state.conversations[0].sessionId, 'session-v1');
     assert.equal(state.conversations[0].contextStatus, 'legacy-unbound');
     assert.deepEqual(state.conversations[0].materialVersionIds, []);

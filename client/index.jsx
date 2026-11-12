@@ -10,6 +10,7 @@ import { App } from './workbench.jsx';
 import { Mark } from './components.jsx';
 import { registerRealtimeSettings } from './realtime-settings.jsx';
 import { appendNativeDraft } from './desk-context.js';
+import { mountBetterSidebar } from './sidebar-integration.jsx';
 import { en, zh } from '../locale/dictionaries.js';
 
 export const inject = ['slots', 'locale', 'sessions', 'resources', 'workspaces', 'configForms', 'remote', 'remote.credentials'];
@@ -21,12 +22,14 @@ export function apply(ctx) {
   ctx.effect(() => () => client.dispose(), 'zhijing: career data owner');
   ctx.effect(() => ctx.locale.register(namespace, { zh, en }), 'zhijing: dictionaries');
   const t = ctx.locale.bind(namespace);
+  mountBetterSidebar(ctx, t);
   ctx.effect(() => registerRealtimeSettings(ctx, namespace), 'zhijing: official realtime settings');
   ctx.effect(() => ctx.resources.register(careerSessionProvider(ctx.sessions)), 'zhijing: native session resources');
   const actions = {
     hooks: { career: client.source, nativeSessions: ctx.sessions.list, workspaceChoices: ctx.workspaces.list },
     refresh: client.refresh,
     cancelCurrent: client.cancelCurrent,
+    retryCurrent: client.retryCurrent,
     action: client.action,
     prepareChatDraft: (sessionId, prompt) => appendNativeDraft(ctx.sessions, ctx.get('conversation'), sessionId, prompt),
     upload: client.upload,
@@ -40,10 +43,13 @@ export function apply(ctx) {
     enableVoiceInput: ({ signal } = {}) => enableDshVoice({ getManager: () => ctx.get('remote.pluginManager'),
       openSettings: () => actions.openVoiceSettings(), signal }),
     openWorkspaceManager: () => { const layout = ctx.get('layout'); layout?.selectPanel(null); return Boolean(layout); },
-    async createConversation(goalId, title, versionId, workspaceId) {
+    async createConversation(goalId, title, versionId, workspaceId, objectTarget) {
       if (!ctx.workspaces.list.getSnapshot().items.some(row => row.workspaceId === workspaceId)) throw Object.assign(new Error(t('workspaceRequired')), { code: 'WORKSPACE_REQUIRED' });
       const sessionId = await ctx.sessions.create({ workspaceId });
-      return client.action('conversation.link', { goalId: goalId || null, sessionId, title, kind: 'chat', ...(versionId ? { versionId } : {}) });
+      const row = await client.action('conversation.link', { goalId: goalId || null, sessionId, title, kind: 'chat', ...(versionId ? objectTarget?.kind === 'material' ? { contextVersionId: versionId } : { versionId } : {}) });
+      if (objectTarget && versionId) await client.action('conversation.bindObject', { kind: objectTarget.kind, id: objectTarget.id, sessionId });
+      else if (objectTarget?.kind === 'goal') await client.action('conversation.bindObject', { kind: 'goal', id: objectTarget.id, sessionId });
+      return row;
     },
     async startInterview(input) {
       if (!ctx.workspaces.list.getSnapshot().items.some(row => row.workspaceId === input.workspaceId)) throw Object.assign(new Error(t('workspaceRequired')), { code: 'WORKSPACE_REQUIRED' });

@@ -1,4 +1,6 @@
+import { zhDesk, enDesk } from './desk.js';
 export const zh = {
+  ...zhDesk,
   assistant: '求职助手', showAssistant: '打开助手', hideAssistant: '收起助手', expandChat: '展开对话', backToWorkbench: '返回工作台',
   assistantEmpty: '新建或选择一个对话，就可以一边查看资料，一边和助手讨论。',
   askAboutMaterial: '交给助手讨论', choosePassage: '选择一段原文', choosePassageNote: '选中文字后交给助手，原文不会被修改。', askAboutPassage: '讨论选中文字',
@@ -96,6 +98,7 @@ export const zh = {
 };
 
 export const en = {
+  ...enDesk,
   assistant: 'Career assistant', showAssistant: 'Open assistant', hideAssistant: 'Hide assistant', expandChat: 'Expand conversation', backToWorkbench: 'Back to workbench',
   assistantEmpty: 'Start or select a conversation to discuss your materials while keeping them in view.',
   askAboutMaterial: 'Discuss with assistant', choosePassage: 'Choose a passage', choosePassageNote: 'Select text to discuss it. The saved source stays unchanged.', askAboutPassage: 'Discuss selected text',

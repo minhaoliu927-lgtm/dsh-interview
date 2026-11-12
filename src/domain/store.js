@@ -34,6 +34,10 @@ CREATE TABLE realtime_events(id TEXT PRIMARY KEY,call_id TEXT NOT NULL REFERENCE
 CREATE INDEX realtime_events_call ON realtime_events(call_id,created_at,id);
 CREATE TRIGGER immutable_realtime_event BEFORE UPDATE OF call_id,event_key,role,text,text_hash,question_id,data_json ON realtime_events BEGIN SELECT RAISE(ABORT,'immutable_realtime_event'); END;
 CREATE TRIGGER immutable_realtime_event_delete BEFORE DELETE ON realtime_events BEGIN SELECT RAISE(ABORT,'immutable_realtime_event'); END;
+` }, { version: 4, sql: `
+CREATE TABLE operation_receipts(id TEXT PRIMARY KEY,action TEXT NOT NULL,target_json TEXT NOT NULL,undo_json TEXT,created_at TEXT NOT NULL,used_at TEXT);
+CREATE INDEX operation_receipts_created ON operation_receipts(created_at);
+CREATE TABLE desk_conversations(object_kind TEXT NOT NULL CHECK(object_kind IN ('material','goal','assessment','rewrite','report')),object_id TEXT NOT NULL,session_id TEXT NOT NULL REFERENCES conversations(session_id),PRIMARY KEY(object_kind,object_id));
 ` }];
 
 function checkedDirectory(directory) {
@@ -113,6 +117,7 @@ export function openStore(directory) {
   return {
     db,
     transaction(operation) {
+      if (db.isTransaction) return operation();
       db.exec('BEGIN IMMEDIATE');
       try { const result = operation(); db.exec('COMMIT'); return result; }
       catch (error) { db.exec('ROLLBACK'); throw error; }

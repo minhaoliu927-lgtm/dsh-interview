@@ -86,6 +86,8 @@ export function createCareerClient(api, { intervalMs = 5000, schedule = setInter
     ...(task.finishedAt !== undefined ? { finishedAt: task.finishedAt } : {}),
     ...(task.cancelState ? { cancelState: task.cancelState } : {}),
     ...(task.error ? { error: task.error } : {}),
+    ...(task.receipt ? { receipt: task.receipt } : {}),
+    canRetry: task.status === 'failed' && !task.saveAcknowledged,
     saveAcknowledged: task.saveAcknowledged } : null;
   const publish = patch => {
     if (disposed) return;
@@ -166,14 +168,14 @@ export function createCareerClient(api, { intervalMs = 5000, schedule = setInter
       throw Object.assign(new Error('Invalid or repeated request identity'), { code: 'INVALID_REQUEST_ID' });
     }
     usedRequestIds.add(requestId);
-    const task = { action, requestId, sequence: ++sequence, startedAt: now(), status: 'running', saveAcknowledged: false,
+    const task = { action, requestId, sequence: ++sequence, startedAt: now(), status: 'running', saveAcknowledged: false, retry: operation,
       controller: new AbortController(), cancelRequested: false };
     tasks.set(requestId, task); controllers.add(task.controller); mutationEpoch += 1;
     publishTasks({ pending: snapshot.pending + 1, error: null });
     try {
       const result = await waitForTask(task, operation);
       if (task.cancelRequested || task.controller.signal.aborted) throw abortError();
-      task.saveAcknowledged = true; task.status = 'refreshing'; publishTasks();
+      task.saveAcknowledged = true; task.receipt = result?.receipt; task.status = 'refreshing'; publishTasks();
       await reconcile();
       terminal(task, 'succeeded');
       return result;
@@ -232,6 +234,8 @@ export function createCareerClient(api, { intervalMs = 5000, schedule = setInter
       },
     },
     refresh,
+    retryCurrent: () => latestTerminal?.status === 'failed' && !latestTerminal.saveAcknowledged && !tasks.size
+      ? direct(latestTerminal.action, latestTerminal.retry) : Promise.resolve(undefined),
     action: (action, input) => action === 'task.cancel'
       ? Promise.reject(Object.assign(new Error('Use this client’s current task cancellation'), { code: 'CLIENT_TASK_INTERNAL' }))
       : separateReads.has(action) ? tracked(signal => api.request(action, input, { signal }))

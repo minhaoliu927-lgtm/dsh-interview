@@ -49,12 +49,12 @@
       },
       "versions": [
         {
-          "version": "0.1.0-dev.6",
-          "publishTimestamp": 1794491981,
+          "version": "0.1.0-dev.7",
+          "publishTimestamp": 1794496792,
           "source": {
             "type": "git",
             "url": "https://github.com/minhaoliu927-lgtm/dsh-interview-desk",
-            "commit": "844a74521a5ff6b0506c3c069196d1e7812df468"
+            "commit": "bd54d7b271d3124a6cc1a9178ad805cc684736d3"
           },
           "engines": {
             "dsh": "0.2.2-rc.1"

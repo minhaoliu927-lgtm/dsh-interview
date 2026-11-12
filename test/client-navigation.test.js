@@ -25,6 +25,23 @@ const fixture = () => ({ materials: [
   { id: 'job', kind: 'job', title: 'Role', versions: [{ id: 'j1', confirmed: true }] },
 ], reports: [] });
 
+test('object studio return restores collection session and each object retains its own native conversation', () => {
+  let state = { ...workbench.initialWorkbenchNavigation(), view: 'personal', sessionId: 'global' };
+  const send = event => { state = workbench.workbenchNavigation(state, event); };
+  send({ type: 'openObject', target: { kind: 'material', id: 'A' }, page: 'personal', view: 'personal' });
+  assert.equal(state.sessionId, null);
+  send({ type: 'deskChat', sessionId: 'object-A' });
+  send({ type: 'openObject', target: { kind: 'material', id: 'B' }, page: 'personal', view: 'personal' });
+  assert.equal(state.sessionId, null);
+  send({ type: 'deskChat', sessionId: 'object-B' });
+  send({ type: 'openObject', target: { kind: 'material', id: 'A' }, page: 'personal', view: 'personal' });
+  assert.equal(state.sessionId, 'object-A');
+  send({ type: 'closeObject' }); assert.equal(state.sessionId, 'global'); assert.equal(state.view, 'personal');
+  send({ type: 'openObject', target: { kind: 'material', id: 'B' }, page: 'personal', view: 'personal' });
+  assert.equal(state.sessionId, 'object-B');
+  send({ type: 'deskPage', view: 'reports' }); assert.equal(state.sessionId, 'global'); assert.equal(state.studio, null);
+});
+
 test('returning from personal material or another goal restores the exact chat, tab and resume without cross-goal selection', () => {
   let state = workbench.initialWorkbenchNavigation();
   const send = event => { state = workbench.workbenchNavigation(state, event); };

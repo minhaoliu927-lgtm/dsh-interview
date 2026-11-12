@@ -88,13 +88,13 @@ export function MaterialForm({ t, busy, onClose, onSave, onUpload, material, ver
   </Modal>;
 }
 
-export function GoalForm({ t, busy, onClose, onSave, draft, onDraftChange, saving = false }) {
+export function GoalForm({ t, busy, onClose, onSave, draft, onDraftChange, saving = false, editing = false }) {
   const [{ title, company, description }, update] = useFormDraft({ title: '', company: '', description: '' }, draft, onDraftChange);
-  return <Modal title={t('newGoal')} onClose={onClose} t={t} busy={saving}><form className="zj-form" onSubmit={event => { event.preventDefault(); if (!busy) void onSave({ title, company, description }); }}>
+  return <Modal title={t(editing ? 'deskEditGoal' : 'newGoal')} onClose={onClose} t={t} busy={saving}><form className="zj-form" onSubmit={event => { event.preventDefault(); if (!busy) void onSave({ title, company, description }); }}>
     <label>{t('title')}<input required disabled={saving} maxLength={160} value={title} onChange={e => update({ title: e.target.value })}/></label>
     <label>{t('company')}<input disabled={saving} maxLength={160} value={company} onChange={e => update({ company: e.target.value })}/></label>
     <label>{t('description')}<textarea disabled={saving} value={description} onChange={e => update({ description: e.target.value })} rows={4}/></label>
-    <FormFooter t={t} busy={busy} saving={saving} onClose={onClose} submit="create"/>
+    <FormFooter t={t} busy={busy} saving={saving} onClose={onClose} submit={editing ? 'save' : 'create'}/>
   </form></Modal>;
 }
 

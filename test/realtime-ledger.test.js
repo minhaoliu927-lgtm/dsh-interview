@@ -87,7 +87,7 @@ test('real v2 database upgrades forward and failed v3 migration rolls back', t =
   };
   const dir = directory(t), db = prepare(dir); db.close();
   const migrated = openStore(dir);
-  assert.equal(migrated.db.prepare('SELECT MAX(version) AS version FROM schema_migrations').get().version, 3); migrated.close();
+  assert.equal(migrated.db.prepare('SELECT MAX(version) AS version FROM schema_migrations').get().version, 4); migrated.close();
   const failedDir = directory(t), conflicting = prepare(failedDir);
   conflicting.exec('CREATE TABLE realtime_events(id TEXT PRIMARY KEY)'); conflicting.close();
   assert.throws(() => openStore(failedDir));
