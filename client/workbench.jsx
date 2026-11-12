@@ -1,0 +1,187 @@
+import React from 'react';
+import css from './styles.css';
+import { Button, GoalForm, Mark, MaterialForm, MaterialPicker, Modal, Tabs, TaskCancelContext, createSubmissionGuard } from './components.jsx';
+import { Materials, GoalMaterials } from './materials.jsx';
+import { Analysis, ResumeSelect } from './analysis.jsx';
+import { Interview, InterviewForm, interviewFormDraft } from './interview.jsx';
+import { NativeChat } from './native-chat.jsx';
+import { citationSource, quoteSegments, versionEntry } from './model.js';
+import { SourceDialog } from './source.jsx';
+import { VoiceSetup } from './voice-ui.jsx';
+import { TaskCard } from './task-card.jsx';
+
+export function initialWorkbenchNavigation() {
+  return { view: 'home', goalId: null, sessionId: null, byGoal: {}, drafts: {} };
+}
+
+// Navigation and unfinished input are scoped to this mounted workbench, never to
+// browser storage or another user. Session history remains owned by DSH.
+export function workbenchNavigation(state, event) {
+  if (event.type === 'draft') {
+    const drafts = { ...state.drafts };
+    if (event.value === undefined) delete drafts[event.key]; else drafts[event.key] = event.value;
+    return { ...state, drafts };
+  }
+  if (event.type === 'view') return { ...state, view: event.view,
+    ...(event.view === 'home' ? { goalId: null, sessionId: null } : {}) };
+  if (event.type === 'goal') {
+    const saved = state.byGoal[event.goalId];
+    // Clicking the current goal from its chat opens the goal's own tabs. Coming
+    // back from another section restores the last visited view and exact Session.
+    const view = state.goalId === event.goalId && state.view === 'chat' ? 'goal' : saved?.view || 'goal';
+    return { ...state, view, goalId: event.goalId, sessionId: saved?.sessionId || null,
+      byGoal: { ...state.byGoal, [event.goalId]: { tab: 'overview', versionId: '', ...saved, view } } };
+  }
+  if (event.type === 'chat') {
+    const goalId = event.goalId || null;
+    return { ...state, view: 'chat', goalId, sessionId: event.sessionId,
+      byGoal: goalId ? { ...state.byGoal, [goalId]: { tab: 'overview', versionId: '', ...state.byGoal[goalId], view: 'chat', sessionId: event.sessionId } } : state.byGoal };
+  }
+  if ((event.type === 'tab' || event.type === 'version') && state.goalId) {
+    return { ...state, byGoal: { ...state.byGoal, [state.goalId]: { ...state.byGoal[state.goalId],
+      [event.type === 'tab' ? 'tab' : 'versionId']: event.value } } };
+  }
+  return state;
+}
+
+export function materialDraftKey(modal) {
+  return modal?.material ? `material:${modal.material.id}:${modal.version?.id || ''}` : `material:new:${modal?.goalId || ''}:${modal?.initialKind || 'resume'}`;
+}
+
+export function App({ t, useCareer, useNativeSessions, useWorkspaceChoices, action, upload, refresh, cancelCurrent, createConversation, startInterview, interviewAction, download,
+  voiceApi, realtimeApi, openRealtimeSettings, enableVoiceInput, openVoiceSettings, openWorkspaceManager, readSource, loadOriginal, downloadOriginal, useResource, SessionProvider, renderSlot }) {
+  const snapshot = useCareer(value => value);
+  const state = snapshot.data;
+  const [navigation, navigate] = React.useReducer(workbenchNavigation, undefined, initialWorkbenchNavigation);
+  const { view, goalId, sessionId, drafts } = navigation;
+  const selectedGoal = navigation.byGoal[goalId];
+  const selectedResume = versionEntry(state, selectedGoal?.versionId);
+  const versionId = selectedResume?.material.kind === 'resume' && selectedResume.version.confirmed ? selectedResume.version.id : '';
+  const tab = selectedGoal?.tab || 'overview';
+  const setVersionId = value => navigate({ type: 'version', value });
+  const setTab = value => navigate({ type: 'tab', value });
+  const setView = view => navigate({ type: 'view', view });
+  const saveDraft = (key, value) => navigate({ type: 'draft', key, value });
+  const [materialId, setMaterialId] = React.useState(null);
+  const [materialVersionId, setMaterialVersionId] = React.useState(null);
+  const [modal, setModal] = React.useState(null);
+  const [error, setError] = React.useState(null);
+  const [localPending, setLocalPending] = React.useState(0);
+  const [pendingLink, setPendingLink] = React.useState(null);
+  const submissionGuard = React.useRef(null);
+  if (!submissionGuard.current) submissionGuard.current = createSubmissionGuard();
+  const currentModal = React.useRef(modal);
+  currentModal.current = modal;
+  const nativeSessions = useNativeSessions(value => value);
+  const workspaceChoices = useWorkspaceChoices(value => value);
+  const [workspaceId, setWorkspaceId] = React.useState('');
+  const workspaceAnchor = React.useRef(null);
+  const mainSessions = nativeSessions.ids.filter(id => nativeSessions.byId[id]?.retainedBy?.mainView > 0);
+  const inheritedWorkspace = mainSessions.length === 1 ? workspaceChoices.items.find(row => row.sessionIds.includes(mainSessions[0])) : undefined;
+  const selectedWorkspace = workspaceChoices.items.find(row => row.workspaceId === workspaceId) || (!workspaceId ? inheritedWorkspace : undefined);
+  const sessionWorkspace = workspaceChoices.items.find(row => row.sessionIds.includes(sessionId));
+  const nativeRunning = Boolean(nativeSessions.byId[sessionId]?.running);
+  const goal = state.goals.find(row => row.id === goalId);
+  const conversations = state.conversations || state.goals.flatMap(row => row.conversations);
+  const conversation = conversations.find(row => row.sessionId === sessionId);
+  const conversationTitle = row => nativeSessions.byId[row.sessionId]?.title || row.title;
+  const interview = state.interviews.find(row => row.sessionId === sessionId);
+  const busy = localPending > 0 || snapshot.pending > 0 || nativeRunning;
+  const currentError = error || snapshot.error;
+  const errors = new Set(['NETWORK','FILE_TOO_LARGE','JOB_MATERIAL_REQUIRED','INVALID_RESPONSE','REQUEST_FAILED','EXPORT_FAILED','WORKSPACE_REQUIRED']);
+
+  const run = (operation, success) => submissionGuard.current(async () => {
+    setError(null);
+    setLocalPending(count => count + 1);
+    try { const result = await operation(); success?.(result); return result; }
+    catch (reason) { if (reason?.name !== 'AbortError' && !['CANCELLED', 'ABORT_ERR'].includes(reason?.code)) setError(reason); return undefined; }
+    finally { setLocalPending(count => Math.max(0, count - 1)); }
+  });
+  const perform = (name, input) => run(() => action(name, input));
+  const performInterview = (name, input) => run(() => interviewAction(name, input));
+  const exportFile = (kind, id, format) => run(() => download(kind, id, format));
+  const restoreWorkspace = id => {
+    const workspace = workspaceChoices.items.find(row => row.sessionIds.includes(id));
+    if (workspace) setWorkspaceId(workspace.workspaceId);
+  };
+  const selectGoal = goalId => { restoreWorkspace(navigation.byGoal[goalId]?.sessionId); navigate({ type: 'goal', goalId }); };
+  const selectChat = row => { restoreWorkspace(row.sessionId); navigate({ type: 'chat', goalId: row.goalId, sessionId: row.sessionId }); };
+  const newChat = id => {
+    if (!selectedWorkspace) { workspaceAnchor.current?.focus(); return; }
+    return run(() => createConversation(id, t('untitledChat'), id && versionEntry(state, versionId)?.version.confirmed ? versionId : undefined, selectedWorkspace.workspaceId), row => {
+    selectChat({ ...row, goalId: id });
+    });
+  };
+  const openInterview = () => {
+    if (!selectedWorkspace) { workspaceAnchor.current?.focus(); return; }
+    const key = `interview:${goalId}`;
+    saveDraft(key, interviewFormDraft(state, versionId, drafts[key]));
+    setModal({ kind: 'interview', goalId });
+  };
+  const addMaterial = (kind = 'resume', targetGoal = null) => setModal({ kind: 'material', initialKind: kind, goalId: targetGoal });
+  const materialSaved = material => {
+    if (modal?.goalId) setPendingLink({ materialId: material.id, goalId: modal.goalId });
+    saveDraft(materialDraftKey(modal), undefined);
+    if (currentModal.current === modal) { setMaterialId(material.id); setMaterialVersionId(material.latestVersionId); setModal(null); setView('personal'); }
+  };
+  const confirmVersion = selectedVersionId => run(async () => {
+    const result = await action('material.confirm', { versionId: selectedVersionId });
+    if (pendingLink && result.materialId === pendingLink.materialId) await action('goal.linkMaterial', { goalId: pendingLink.goalId, versionId: selectedVersionId });
+    return result;
+  }, result => { if (pendingLink && result.materialId === pendingLink.materialId) { selectGoal(pendingLink.goalId); setPendingLink(null); } });
+  const nativeChat = sessionId ? sessionWorkspace ? <NativeChat key={sessionId} sessionId={sessionId} t={t} useResource={useResource} SessionProvider={SessionProvider} renderSlot={renderSlot}/> : <div className="zj-body"><p className="zj-error">{workspaceChoices.phase === 'ready' ? t('floatingConversation') : t('loading')}</p></div> : null;
+  const title = view === 'personal' ? t('personal') : (view === 'chat' && conversation && conversationTitle(conversation)) || goal?.title || t('panel');
+  const showEvidence = citation => setModal({ kind: 'citation', citation });
+  const source = modal?.kind === 'citation' ? citationSource(state, modal.citation.sourceId) : null;
+  const segments = source ? quoteSegments(source.text, modal.citation) : null;
+  const reviewVersion = selectedVersionId => {
+    const entry = versionEntry(state, selectedVersionId);
+    if (entry) { setMaterialId(entry.material.id); setMaterialVersionId(entry.version.id); setView('personal'); }
+  };
+
+  return <TaskCancelContext.Provider value={{ canCancel: Boolean(snapshot.operation?.canCancel), cancel: () => cancelCurrent?.(snapshot.operation?.requestId) }}><div className="zj" data-zhijing-workbench=""><style>{css}</style><aside className="zj-rail" aria-label={t('panel')}>
+    <div className="zj-brand"><Mark size={26}/><span>{t('panel')}</span></div>
+    <nav className="zj-nav"><button className={view === 'home' ? 'is-active' : ''} onClick={() => setView('home')}>{t('home')}</button><button className={view === 'personal' ? 'is-active' : ''} onClick={() => setView('personal')}>{t('personal')}</button></nav>
+    <section><h2 className="zj-section-label">{t('goals')}<button title={t('newGoal')} aria-label={t('newGoal')} onClick={() => setModal({ kind: 'goal' })}>+</button></h2>
+      <div className="zj-goals">{state.goals.map(row => <div key={row.id}><button className={`zj-goal-name${goalId === row.id ? ' is-active' : ''}`} onClick={() => selectGoal(row.id)}><span>{row.title}</span></button>
+        {row.conversations.map(chat => <button className={`zj-chat-link${sessionId === chat.sessionId && view === 'chat' ? ' is-active' : ''}`} key={chat.id} onClick={() => selectChat({ ...chat, goalId: row.id })}><span>{conversationTitle(chat)}</span></button>)}
+      </div>)}</div>{!state.goals.length && <p className="zj-subtle" style={{ padding: '0 10px' }}>{t('noGoals')}</p>}
+    </section>
+    {conversations.some(row => !row.goalId) && <section><h2 className="zj-section-label">{t('ungrouped')}</h2>{conversations.filter(row => !row.goalId).map(row => <button key={row.id} className={`zj-chat-link${sessionId === row.sessionId ? ' is-active' : ''}`} onClick={() => selectChat(row)}><span>{conversationTitle(row)}</span></button>)}</section>}
+    <div className="zj-voice-setup"><Button small quiet onClick={openRealtimeSettings}>{t('realtimeSettings')}</Button><details><summary>{t('compatibleVoiceInput')}</summary><VoiceSetup t={t} enableVoiceInput={enableVoiceInput} openVoiceSettings={openVoiceSettings}/></details></div>
+  </aside><section className="zj-main"><header className="zj-topbar"><h1>{title}</h1>{goal?.company && <span className="zj-subtle">{goal.company}</span>}
+    <div className="zj-toolbar"><Button small quiet onClick={() => { setError(null); void refresh(); }}>{t('refresh')}</Button>{view !== 'personal' && <Button small disabled={busy} onClick={() => newChat(goal?.id || null)}>{t('newChat')}</Button>}{goal && <Button small primary disabled={busy} onClick={openInterview}>{t('newInterview')}</Button>}</div>
+  </header>
+    <div className="zj-review-note"><label>{t('dshWorkspace')} <select ref={workspaceAnchor} value={selectedWorkspace?.workspaceId || ''} onChange={event => setWorkspaceId(event.target.value)}><option value="">{t('selectWorkspace')}</option>{workspaceChoices.items.map(row => <option key={row.workspaceId} value={row.workspaceId}>{row.title}</option>)}</select></label>{!selectedWorkspace && <span>{t('workspaceRequired')}</span>}
+      <Button small quiet onClick={() => run(async () => { if (!openWorkspaceManager?.()) throw new Error(t('unavailable')); })}>{t('manageWorkspaces')}</Button>
+    </div>
+    {(busy || snapshot.loading) && <div className="zj-progress" role="progressbar" aria-label={t('processing')}/>}
+    <TaskCard operation={snapshot.operation} onCancel={cancelCurrent} t={t}/>
+    {currentError && <div className="zj-error" role="alert"><strong>{t('errorTitle')}</strong><span>{errors.has(currentError.code) ? t(`error_${currentError.code}`) : currentError.message || t('error_REQUEST_FAILED')}</span><Button quiet small onClick={() => { setError(null); void refresh(); }}>{t('retry')}</Button></div>}
+    {!snapshot.ready ? <div className="zj-body"><p className="zj-subtle">{t('loading')}</p></div> : view === 'personal' ? <Materials state={state} t={t} busy={busy} selectedId={materialId} selectedVersionId={materialVersionId} onSelect={id => { setMaterialId(id); setMaterialVersionId(null); }} onAdd={() => addMaterial()} onEdit={(material, version) => setModal({ kind: 'material', material, version })} onConfirm={confirmVersion} onExport={exportFile} onAssess={id => perform('assessment.run', { kind: 'resume', versionId: id })} onEvidence={showEvidence} onSource={id => run(() => readSource(id), data => setModal({ kind: 'source', data }))}/> : view === 'chat' && sessionId ? <>
+      {(conversation?.materialVersionIds || []).map(id => versionEntry(state, id)).filter(entry => entry?.material.kind === 'resume').map(({ material, version }) => <div className="zj-review-note" key={version.id}><span>{t('resume')} · {material.title} · {t('version', { number: version.revision })}</span><span>{t('chatSnapshot')}</span></div>)}
+      {conversation && !conversation.goalId && state.goals.length > 0 && <div className="zj-review-note"><Button small onClick={() => setModal({ kind: 'bindConversation' })}>{t('bindConversation')}</Button></div>}
+      {interview ? <Interview key={interview.id} state={state} interview={interview} t={t} busy={busy || !sessionWorkspace} onAction={performInterview} onExport={exportFile} voiceApi={voiceApi} realtimeApi={realtimeApi} openRealtimeSettings={openRealtimeSettings} onChanged={refresh} nativeChat={interview.mode === 'realtime' ? null : nativeChat} onEvidence={showEvidence}
+        answerDraft={drafts[`answer:${interview.id}:${interview.currentQuestionId}`]} onAnswerDraftChange={value => saveDraft(`answer:${interview.id}:${interview.currentQuestionId}`, value)}/> : nativeChat}
+    </> : view === 'goal' && goal ? <div className="zj-body"><div className="zj-page-heading"><div><span className="zj-eyebrow">{t('goals')}</span><h2>{goal.title}</h2>{goal.description && <p>{goal.description}</p>}</div></div>
+      <Tabs values={['overview','review','fit','rewrite']} active={tab} onChange={setTab} t={t}/>
+      {tab === 'overview' ? <><div className="zj-form"><ResumeSelect state={state} value={versionId} onChange={setVersionId} t={t}/><p className="zj-subtle">{t('chatSnapshot')}</p></div><div className="zj-actions"><Button primary disabled={busy} onClick={() => newChat(goal.id)}>{t('newChat')}</Button><Button disabled={busy} onClick={openInterview}>{t('newInterview')}</Button></div>
+        <GoalMaterials state={state} goal={goal} t={t} onAdd={() => addMaterial('job', goal.id)} onLink={() => setModal({ kind: 'linkMaterial' })}/>
+        {goal.conversations.length > 0 && <section className="zj-card"><h3>{t('chat')}</h3>{goal.conversations.map(row => <div className="zj-attach" key={row.id}><div><strong>{conversationTitle(row)}</strong><span className="zj-subtle">{t(row.kind === 'interview' ? 'interview' : 'chat')}</span></div><Button small onClick={() => selectChat({ ...row, goalId: goal.id })}>{t('start')}</Button></div>)}</section>}
+      </> : <Analysis state={state} goal={goal} tab={tab} t={t} busy={busy} onAction={perform} onExport={exportFile} selectedVersion={versionId} onSelectVersion={setVersionId} onReviewVersion={reviewVersion} onEvidence={showEvidence}
+        draft={drafts[`analysis:${goal.id}:${versionId}:${tab}`]} onDraftChange={value => saveDraft(`analysis:${goal.id}:${versionId}:${tab}`, value)}/>}
+    </div> : <div className="zj-body"><div className="zj-empty"><span className="zj-eyebrow">{t('tagline')}</span><h2>{t('homeTitle')}</h2><p>{t('homeNote')}</p><div className="zj-actions"><Button primary disabled={busy} onClick={() => newChat(null)}>{t('newChat')}</Button><Button onClick={() => setModal({ kind: 'goal' })}>{t('newGoal')}</Button><Button quiet onClick={() => addMaterial()}>{t('addMaterial')}</Button></div></div></div>}
+  </section>
+    {modal?.kind === 'goal' && <GoalForm t={t} busy={busy} saving={localPending > 0} draft={drafts.goal} onDraftChange={value => saveDraft('goal', value)} onClose={() => setModal(null)} onSave={input => run(() => action('goal.create', input), value => { saveDraft('goal', undefined); if (currentModal.current === modal) { setModal(null); selectGoal(value.id); } })}/>}
+    {modal?.kind === 'material' && <MaterialForm key={materialDraftKey(modal)} t={t} busy={busy} saving={localPending > 0} {...modal} draft={drafts[materialDraftKey(modal)]} onDraftChange={value => saveDraft(materialDraftKey(modal), value)} onClose={() => setModal(null)} onSave={(name, input) => run(() => action(name, input), materialSaved)} onUpload={(file, metadata) => run(() => upload(file, metadata), materialSaved)}/>}
+    {modal?.kind === 'linkMaterial' && goal && <MaterialPicker t={t} state={state} busy={busy} onClose={() => setModal(null)} onSelect={id => run(() => action('goal.linkMaterial', { goalId: goal.id, versionId: id }), () => setModal(null))}/>}
+    {modal?.kind === 'interview' && goal && <InterviewForm key={goal.id} t={t} state={state} goal={goal} busy={busy} saving={localPending > 0} selectedVersion={versionId}
+      draft={drafts[`interview:${goal.id}`]} onDraftChange={value => { saveDraft(`interview:${goal.id}`, value); setVersionId(value.versionId); }}
+      onClose={() => setModal(null)} onStart={input => run(() => startInterview({ ...input, workspaceId: selectedWorkspace?.workspaceId }), result => {
+        saveDraft(`interview:${goal.id}`, undefined); if (currentModal.current === modal) { setModal(null); selectChat({ goalId: goal.id, sessionId: result.sessionId }); }
+      })}/>}
+    {modal?.kind === 'citation' && <Modal title={source?.title || t('evidence')} t={t} onClose={() => setModal(null)}>{source ? <>{source.revision && <p className="zj-subtle">{t('version', { number: source.revision })}</p>}<div className="zj-paper-content">{segments.before}{segments.quote && <mark>{segments.quote}</mark>}{segments.after}</div></> : <p className="zj-subtle">{t('unavailable')}</p>}</Modal>}
+    {modal?.kind === 'source' && <SourceDialog key={modal.data.versionId} data={modal.data} t={t} onClose={() => setModal(null)} loadOriginal={loadOriginal} onDownload={id => run(() => downloadOriginal(id))}/>}
+    {modal?.kind === 'bindConversation' && conversation && <Modal title={t('bindConversation')} t={t} onClose={() => setModal(null)}>{state.goals.map(row => <div className="zj-attach" key={row.id}><strong>{row.title}</strong><Button small disabled={busy} onClick={() => run(() => action('conversation.link', { goalId: row.id, sessionId: conversation.sessionId, title: conversation.title, kind: conversation.kind }), () => { selectChat({ ...conversation, goalId: row.id }); setModal(null); })}>{t('link')}</Button></div>)}</Modal>}
+  </div></TaskCancelContext.Provider>;
+}

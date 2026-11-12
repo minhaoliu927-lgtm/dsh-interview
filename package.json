@@ -1,0 +1,80 @@
+{
+  "name": "dsh-interview",
+  "version": "0.1.0-dev.5",
+  "description": "DSH 原生求职工作台：个人资料、简历分析与修改、文字和语音模拟面试。",
+  "type": "module",
+  "license": "MIT",
+  "main": "src/host.js",
+  "exports": {
+    ".": "./src/host.js",
+    "./client": "./dist/client.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg",
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-runtime"
+      ]
+    }
+  },
+  "engines": {
+    "node": ">=24.9.0",
+    "dsh": "0.2.2-rc.1"
+  },
+  "keywords": [
+    "dsh-plugin",
+    "dsh-interview",
+    "deepseek-harness",
+    "resume",
+    "interview"
+  ],
+  "files": [
+    "src",
+    "dist",
+    "skills",
+    "assets",
+    "locale",
+    "icon.svg",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md"
+  ],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node --test test/*.test.js",
+    "prepack": "node scripts/build.mjs"
+  },
+  "dependencies": {
+    "@deepseek-ai/schemastery": "3.19.0",
+    "@pdf-lib/fontkit": "1.1.1",
+    "@sinclair/typebox": "0.34.49",
+    "docx": "9.5.1",
+    "parse5": "8.0.0",
+    "pdf-lib": "1.17.1",
+    "pdfjs-dist": "6.1.200",
+    "saxes": "6.0.0",
+    "ws": "8.22.1",
+    "yauzl": "3.4.0"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/minhaoliu927-lgtm/dsh-interview.git"
+  },
+  "bugs": {
+    "url": "https://github.com/minhaoliu927-lgtm/dsh-interview/issues"
+  },
+  "homepage": "https://github.com/minhaoliu927-lgtm/dsh-interview#readme"
+}

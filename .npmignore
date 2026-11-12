@@ -1,0 +1,12 @@
+# package.json files is the distribution whitelist. Generated Client and parser
+# files belong in the tarball even though the source repository ignores them.
+.runtime/
+node_modules/
+release/
+.env
+.env.*
+.npmrc
+*.tgz
+*.log
+*.sqlite*
+*.db
