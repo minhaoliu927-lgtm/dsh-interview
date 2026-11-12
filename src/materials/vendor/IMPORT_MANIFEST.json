@@ -1,0 +1,137 @@
+[
+  {
+    "destination": "acquisition/html-job-extractor.ts",
+    "sha256": "a3427ae3f685325745c562a529e8c3dca85ee83e95b89e2246c1f8745c7cbf7e",
+    "source": "apps/desktop/src/main/acquisition/html-job-extractor.ts"
+  },
+  {
+    "destination": "acquisition/http-job-source.ts",
+    "sha256": "dd60d7a3107da505cb28ad655559be8a59cd7daed2e9088a6c78dd5554bbd31b",
+    "source": "apps/desktop/src/main/acquisition/http-job-source.ts"
+  },
+  {
+    "destination": "acquisition/image-policy.ts",
+    "sha256": "4567b87e50dac56334e0bf3cc1c2121fe12840ad1aa972fbd56416332e02651f",
+    "source": "apps/desktop/src/main/acquisition/image-policy.ts"
+  },
+  {
+    "destination": "acquisition/job-fields.ts",
+    "sha256": "491dbbb7b68c6a630f1b7181fed9a83ddd61141182ec915b6496becd722c96aa",
+    "source": "apps/desktop/src/main/acquisition/job-fields.ts"
+  },
+  {
+    "destination": "acquisition/public-url-policy.ts",
+    "sha256": "eeda790c741fb7c9b1c7c3b16359616c78e3286452f5ac1090b111ab0ee1316f",
+    "source": "apps/desktop/src/main/acquisition/public-url-policy.ts"
+  },
+  {
+    "destination": "acquisition/windows-ocr.ps1",
+    "sha256": "c8bb58d9a99de97bcf432b313264b2f93e1255cc549fcb185c52bc8eb3107fd8",
+    "source": "apps/desktop/src/main/acquisition/windows-ocr.ps1"
+  },
+  {
+    "destination": "acquisition/windows-ocr.ts",
+    "sha256": "91419daee2ccb20e9323c685fa9be663254f881fa954fba46b6d5b7dc9da0ce6",
+    "source": "apps/desktop/src/main/acquisition/windows-ocr.ts"
+  },
+  {
+    "destination": "contracts/documents.ts",
+    "sha256": "7d139e448a52b9169fe852a24776b413a991f5d2a2d47f0784b912f27ef810f4",
+    "source": "packages/contracts/src/documents.ts"
+  },
+  {
+    "destination": "contracts/material-source.ts",
+    "sha256": "b16f07de5febe49b5b32069642adc42d5083debdf26f80f6d49072c741579c7c",
+    "source": "packages/contracts/src/material-source.ts"
+  },
+  {
+    "destination": "parser/docx.ts",
+    "sha256": "501bbb4619c965005ad633f8e4208706bdbd09c44d524bb59af9273703df336c",
+    "source": "packages/document-parser/src/docx.ts"
+  },
+  {
+    "destination": "parser/file-errors.ts",
+    "sha256": "22f8a4cbaa66342da404230e7660557d5c3a7095536b12547af303fbf8decc2f",
+    "source": "packages/document-parser/src/file-errors.ts"
+  },
+  {
+    "destination": "parser/index.ts",
+    "sha256": "e3d0ed7a193ebbf1db49cd836c9655860bc085e2774a7774b5fc2e646edf7948",
+    "source": "packages/document-parser/src/index.ts"
+  },
+  {
+    "destination": "parser/inspect-upload.ts",
+    "sha256": "7b6710f140cc0c25f7cea962bc374b78d19cdb8629a491e6e932334385017f5d",
+    "source": "packages/document-parser/src/inspect-upload.ts"
+  },
+  {
+    "destination": "parser/normalize.ts",
+    "sha256": "5abfdc0399ca30e5aad166fc85888c6451d3fc404c23ea074591f028beadc575",
+    "source": "packages/document-parser/src/normalize.ts"
+  },
+  {
+    "destination": "parser/parse-document.ts",
+    "sha256": "c4a88986a6be5f952daead7b8202934414a920dfbd2ff062a479153206b1650a",
+    "source": "packages/document-parser/src/parse-document.ts"
+  },
+  {
+    "destination": "parser/parser-child.ts",
+    "sha256": "332d5bbc037b4d84c932dbf5b28f3720de2fcea02970c527301f0e7228aff69f",
+    "source": "packages/document-parser/src/parser-child.ts"
+  },
+  {
+    "destination": "parser/pdf.ts",
+    "sha256": "cbb965f7d6ef7ce2d069731ccd0e7ab5d9c54559f7b693559103a6ca7651474d",
+    "source": "packages/document-parser/src/pdf.ts"
+  },
+  {
+    "destination": "parser/supervisor/child-guard.ts",
+    "sha256": "ff0f94e764175ed4f971aa12817ccae15ce6dc52bf2fa9df9537cdb353da9d50",
+    "source": "packages/document-parser/src/supervisor/child-guard.ts"
+  },
+  {
+    "destination": "parser/supervisor/environment.ts",
+    "sha256": "a3d87300d3e4c84d115416944e4affad69230e3cc5911cad99683b725eb9d275",
+    "source": "packages/document-parser/src/supervisor/environment.ts"
+  },
+  {
+    "destination": "parser/supervisor/index.ts",
+    "sha256": "af4244a9a9a54f089bc8a5bc97075b865e9278bc1100f49d3ae0761743d9315d",
+    "source": "packages/document-parser/src/supervisor/index.ts"
+  },
+  {
+    "destination": "parser/supervisor/limits.ts",
+    "sha256": "1720edf2f3870cfe4ddf1671f5c4bbbc9b4d9252e2f66e011cb66323715b71e7",
+    "source": "packages/document-parser/src/supervisor/limits.ts"
+  },
+  {
+    "destination": "parser/supervisor/platform.ts",
+    "sha256": "deb2ecd84dc39606f0ae99bd7f464432b2e72ac3365d82390d3f57be020b0f53",
+    "source": "packages/document-parser/src/supervisor/platform.ts"
+  },
+  {
+    "destination": "parser/supervisor/protocol.ts",
+    "sha256": "20c0f30a960e51be197433dc5620643ba5b2c7bad02e1a87878dfd92e722634f",
+    "source": "packages/document-parser/src/supervisor/protocol.ts"
+  },
+  {
+    "destination": "parser/supervisor/windows-job.cs",
+    "sha256": "7fe083c95bd78eb093627fd754ff961c1bc63a622b13807fa39e1b2cb3879e1b",
+    "source": "packages/document-parser/src/supervisor/windows-job.cs"
+  },
+  {
+    "destination": "parser/supervisor/windows-job.ps1",
+    "sha256": "ce832fae37057a3e745c7a8f3a63ac19a3ec934ee6acd7c2824d9a6a9307758f",
+    "source": "packages/document-parser/src/supervisor/windows-job.ps1"
+  },
+  {
+    "destination": "parser/validate-result.ts",
+    "sha256": "7dc692b36efbae243099f332d5778f3f557b58c81cb578768d82e8df4d6ab62a",
+    "source": "packages/document-parser/src/validate-result.ts"
+  },
+  {
+    "destination": "domain/document-limits.ts",
+    "sha256": "be1545b8b6736d8918cc796ce66b26b1c8d9d89cbbf5802d710e29c5b7bdef36",
+    "source": "packages/domain/src/document-limits.ts"
+  }
+]
