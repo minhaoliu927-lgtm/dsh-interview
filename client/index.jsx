@@ -9,6 +9,7 @@ import { Conversation } from './native-chat.jsx';
 import { App } from './workbench.jsx';
 import { Mark } from './components.jsx';
 import { registerRealtimeSettings } from './realtime-settings.jsx';
+import { appendNativeDraft } from './desk-context.js';
 import { en, zh } from '../locale/dictionaries.js';
 
 export const inject = ['slots', 'locale', 'sessions', 'resources', 'workspaces', 'configForms', 'remote', 'remote.credentials'];
@@ -27,10 +28,11 @@ export function apply(ctx) {
     refresh: client.refresh,
     cancelCurrent: client.cancelCurrent,
     action: client.action,
+    prepareChatDraft: (sessionId, prompt) => appendNativeDraft(ctx.sessions, ctx.get('conversation'), sessionId, prompt),
     upload: client.upload,
     voiceApi: api.voice,
     realtimeApi: api.realtime,
-    openRealtimeSettings: () => { const navigation = ctx.get('pluginNavigation'); navigation?.openBundle('dsh-interview'); return Boolean(navigation); },
+    openRealtimeSettings: () => { const navigation = ctx.get('pluginNavigation'); navigation?.openBundle('dsh-interview-desk'); return Boolean(navigation); },
     readSource: versionId => api.request('material.source', { versionId }),
     loadOriginal: api.original,
     async downloadOriginal(versionId) { saveDownload(await api.original(versionId)); },

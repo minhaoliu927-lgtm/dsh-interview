@@ -7,7 +7,7 @@ import { auditText, validatePackedPath } from './audit-package.mjs';
 const sourceRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const manifestName = 'PUBLIC_SOURCE_MANIFEST.json';
 const directories = ['src', 'client', 'scripts', 'test', 'skills', 'locale', 'assets'];
-const rootFiles = ['.gitignore', '.npmignore', 'package.json', 'pnpm-lock.yaml', 'pnpm-workspace.yaml', 'cordis.patch.yml', 'icon.svg', 'LICENSE', 'README.md', 'THIRD_PARTY_NOTICES.md'];
+const rootFiles = ['.gitignore', '.npmignore', 'package.json', 'pnpm-lock.yaml', 'pnpm-workspace.yaml', 'cordis.patch.yml', 'index.json', 'icon.svg', 'LICENSE', 'README.md', 'THIRD_PARTY_NOTICES.md'];
 const assetHashes = {
   'assets/brand/logo-black.svg': 'd7c88cc217272f60d339db40826d7ed1272e298c606c493e13d016645d7b306f',
   'assets/brand/logo-white.svg': '3a24e5711198b26077c318aed2ec54a435c5eb799ea0768204380177ee020e9e',
@@ -96,7 +96,7 @@ export async function verifySource(directory) {
   const manifestPath = join(root, manifestName), stat = await lstat(manifestPath);
   if (!stat.isFile() || stat.isSymbolicLink() || stat.nlink !== 1 || stat.size > 2 * 1024 * 1024) fail('SOURCE_MANIFEST_INVALID', manifestName);
   const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
-  if (manifest.schemaVersion !== 1 || manifest.name !== 'dsh-interview' || manifest.license !== 'MIT' || !Array.isArray(manifest.files)) fail('SOURCE_MANIFEST_INVALID', manifestName);
+  if (manifest.schemaVersion !== 1 || manifest.name !== 'dsh-interview-desk' || manifest.license !== 'MIT' || !Array.isArray(manifest.files)) fail('SOURCE_MANIFEST_INVALID', manifestName);
   const files = await list(root, { all: true });
   if (JSON.stringify(files) !== JSON.stringify(manifest.files.map(row => row.path))) fail('SOURCE_INVENTORY_MISMATCH', 'Manifest and public file list differ');
   const inventory = [];

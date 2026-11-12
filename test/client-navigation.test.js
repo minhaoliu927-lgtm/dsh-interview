@@ -113,3 +113,21 @@ test('rapid duplicate submission is ignored and a failed request can be retried'
   await assert.rejects(guard(async () => { calls++; throw new Error('network'); }), /network/);
   assert.equal(await guard(async () => { calls++; return 'retry-saved'; }), 'retry-saved'); assert.equal(calls, 3);
 });
+
+test('expanded assistant returns to the same material workspace without changing the retained Session', () => {
+  let state = workbench.initialWorkbenchNavigation();
+  for (const event of [{ type: 'goal', goalId: 'A' }, { type: 'deskChat', sessionId: 's1' }, { type: 'view', view: 'personal' },
+    { type: 'chat', goalId: 'A', sessionId: 's1' }, { type: 'workspace' }]) state = workbench.workbenchNavigation(state, event);
+  assert.equal(state.view, 'personal'); assert.equal(state.sessionId, 's1'); assert.equal(state.goalId, 'A');
+  state = workbench.workbenchNavigation(state, { type: 'view', view: 'home' });
+  assert.equal(state.sessionId, 's1');
+});
+
+test('starting an assistant from a material page preserves that page and the role selections', () => {
+  let state = workbench.initialWorkbenchNavigation();
+  for (const event of [{ type: 'goal', goalId: 'A' }, { type: 'version', value: 'resume-v1' },
+    { type: 'tab', value: 'rewrite' }, { type: 'view', view: 'personal' }, { type: 'deskChat', sessionId: 'new-s1' }])
+    state = workbench.workbenchNavigation(state, event);
+  assert.equal(state.view, 'personal'); assert.equal(state.byGoal.A.versionId, 'resume-v1');
+  assert.equal(state.byGoal.A.tab, 'rewrite'); assert.equal(state.byGoal.A.sessionId, 'new-s1');
+});

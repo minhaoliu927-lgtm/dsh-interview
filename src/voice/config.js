@@ -19,7 +19,7 @@ export function realtimeConfig(config = {}) {
 }
 
 export async function realtimeCatalog(ctx, config, available = true) {
-  const result = { available, configured: false, provider: 'qwen-realtime', model: read(config?.realtimeModel) ?? 'qwen3.5-omni-plus-realtime', settingsNs: 'dsh-interview' };
+  const result = { available, configured: false, provider: 'qwen-realtime', model: read(config?.realtimeModel) ?? 'qwen3.5-omni-plus-realtime', settingsNs: 'dsh-interview-desk' };
   try {
     const options = realtimeConfig(config);
     const credentials = ctx.get('credentials');

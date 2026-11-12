@@ -19,7 +19,7 @@ export function parserNodeArguments(entry: string, directory: string, heapMb: nu
     const manifest = join(packageRoot, 'package.json');
     if (existsSync(manifest)) {
       metadata.push(manifest);
-      try { if (JSON.parse(readFileSync(manifest, 'utf8')).name === 'dsh-interview') { found = true; break; } } catch {}
+      try { if (JSON.parse(readFileSync(manifest, 'utf8')).name === 'dsh-interview-desk') { found = true; break; } } catch {}
     }
     if (packageRoot === parse(packageRoot).root) break;
     packageRoot = dirname(packageRoot);

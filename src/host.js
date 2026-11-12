@@ -13,7 +13,7 @@ import { createNativeSessionRecorder } from './voice/native-session.js';
 import { realtimeConfig, realtimeCatalog } from './voice/config.js';
 export { Config } from './voice/config.js';
 
-export const name = 'dsh-interview';
+export const name = 'dsh-interview-desk';
 export const inject = ['dshHomePath', 'tools', 'skills'];
 
 function fail(code, message, status = 400) { return Object.assign(new Error(message), { code, status }); }

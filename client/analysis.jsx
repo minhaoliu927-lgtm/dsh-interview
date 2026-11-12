@@ -79,7 +79,7 @@ export function RewriteResult({ rewrite, state, selectedVersion, onSelectVersion
   </section>;
 }
 
-export function Analysis({ state, goal, tab, t, busy, onAction, onExport, selectedVersion, onSelectVersion, onReviewVersion, onEvidence, draft, onDraftChange }) {
+export function Analysis({ state, goal, tab, t, busy, onAction, onExport, selectedVersion, onSelectVersion, onReviewVersion, onEvidence, draft, onDraftChange, onChatContext }) {
   const scope = `${goal.id}:${selectedVersion || ''}:${tab}`;
   const [localDrafts, setLocalDrafts] = React.useState({}), [selection, setSelection] = React.useState(null), [selectionNotice, setSelectionNotice] = React.useState(null);
   const value = draft ?? localDrafts[scope] ?? {}, instructions = value.instructions ?? '';
@@ -117,6 +117,7 @@ export function Analysis({ state, goal, tab, t, busy, onAction, onExport, select
   }}>
     <ResumeSelect state={state} value={selectedVersion} onChange={onSelectVersion} t={t}/>
     {source ? <p className="zj-subtle">{t('analysisContext', { goal: goal.title, material: source.material.title, version: t('version', { number: source.version.revision }) })}</p> : <p className="zj-subtle">{t('resumeRequired')}</p>}
+    {source && onChatContext && <div><Button small disabled={busy || !source.version.confirmed} onClick={() => onChatContext(source.version.id)}>{t('askAboutMaterial')}</Button></div>}
     {source && !source.version.confirmed && <p className="zj-review-note">{t('unconfirmed')} · {t('reviewNote')}</p>}
     {tab === 'rewrite' ? <>
       {typeof source?.version.text === 'string' && <details className="zj-card"><summary>{t('rewriteSource')}</summary>
@@ -125,6 +126,7 @@ export function Analysis({ state, goal, tab, t, busy, onAction, onExport, select
         <textarea id={sourceId} readOnly rows={8} aria-describedby={sourceHelpId} value={source.version.text.replace(/\r\n?/g, '\n')}
           onSelect={rememberSelection} onKeyUp={rememberSelection} onMouseUp={rememberSelection}/>
         <Button small disabled={busy || !passage || selectionTooLong} onClick={useSelection}>{t('rewriteUseSelection')}</Button>
+        {onChatContext && <Button small disabled={busy || !source.version.confirmed || !passage} onClick={() => passage && onChatContext(source.version.id, passage)}>{t('askAboutPassage')}</Button>}
         {selectionTooLong && <p className="zj-error" role="status">{t('rewriteSelectionTooLong')}</p>}
       </details>}
       <label>{t('rewriteInstructions')}<textarea ref={instructionRef} rows={3} maxLength={10000} disabled={busy} value={instructions} placeholder={t('rewritePlaceholder')} onChange={e => update({ instructions: e.target.value })}/></label>

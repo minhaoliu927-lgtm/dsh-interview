@@ -1,4 +1,13 @@
 export const zh = {
+  assistant: '求职助手', showAssistant: '打开助手', hideAssistant: '收起助手', expandChat: '展开对话', backToWorkbench: '返回工作台',
+  assistantEmpty: '新建或选择一个对话，就可以一边查看资料，一边和助手讨论。',
+  askAboutMaterial: '交给助手讨论', choosePassage: '选择一段原文', choosePassageNote: '选中文字后交给助手，原文不会被修改。', askAboutPassage: '讨论选中文字',
+  selectedContext: '准备引用的资料', cancelContext: '取消引用', previewContext: '查看引用正文', addToChatDraft: '加入对话草稿',
+  contextPreviewNote: '这里只准备引用。加入草稿后仍可修改，点击 DSH 发送按钮后才会发送给模型。', contextAdded: '已加入当前 DSH 对话草稿，原有草稿已保留。请检查后发送。',
+  contextUnavailable: '请先选择已确认的资料版本，并使用普通求职对话。',
+  contextDraftText: '请结合这份资料讨论，以下内容是资料原文。\n资料：{title} · {version}\n版本 ID：{versionId}\n\n{text}',
+  error_NATIVE_DRAFT_UNAVAILABLE: '当前 DSH 暂不提供对话草稿接口，请更新或重新启用插件后重试。', error_NATIVE_DRAFT_BLOCKED: '当前对话正在提交，请稍后再加入草稿。引用仍已保留。', error_CONTEXT_UNAVAILABLE: '请使用已确认的资料版本，并新建或选择普通求职对话。',
+
   rtSettingsNote: '文字分析继续使用 DSH 已配置的模型。这里只设置专用实时音频服务。', rtSettingsPrivacy: '通话时会向所选区域的阿里云百炼发送音频和本次面试资料，可能产生服务费用。', rtSettingsUnavailable: '当前宿主未提供可用的语音配置，请确认插件已启用后重试。',
   rtSettingsEnabled: '实时语音面试', rtSettingsOn: '启用', rtSettingsOff: '停用', rtSettingsRegion: '音频服务地域', rtSettingsBeijing: '中国内地（北京）', rtSettingsSingapore: '国际（新加坡）', rtSettingsWorkspace: '百炼业务空间 ID', rtSettingsWorkspaceHint: '填写音频服务对应的业务空间 ID', rtSettingsModel: '实时音频模型', rtSettingsAdvanced: '高级选项', rtSettingsCredentialRef: 'DSH 音频凭据名称', rtSettingsSave: '保存语音设置', rtSettingsDiscard: '恢复已保存设置',
   rtSettingsSaved: '语音设置已保存。', rtSettingsInvalid: '请检查地域、业务空间 ID、模型和凭据名称。', rtSettingsReadonly: '当前 DSH 配置只读，不能保存修改。', rtSettingsConflict: '设置未保存，宿主配置可能已变化。请恢复已保存设置后重试。', rtSettingsFailed: '语音设置未保存，请检查 DSH 连接后重试。',
@@ -87,6 +96,15 @@ export const zh = {
 };
 
 export const en = {
+  assistant: 'Career assistant', showAssistant: 'Open assistant', hideAssistant: 'Hide assistant', expandChat: 'Expand conversation', backToWorkbench: 'Back to workbench',
+  assistantEmpty: 'Start or select a conversation to discuss your materials while keeping them in view.',
+  askAboutMaterial: 'Discuss with assistant', choosePassage: 'Choose a passage', choosePassageNote: 'Select text to discuss it. The saved source stays unchanged.', askAboutPassage: 'Discuss selected text',
+  selectedContext: 'Selected material', cancelContext: 'Remove reference', previewContext: 'Preview reference', addToChatDraft: 'Add to conversation draft',
+  contextPreviewNote: 'This prepares a reference only. You can edit the draft before pressing the DSH send button.', contextAdded: 'Added to this DSH conversation draft. Your existing draft was preserved. Review it before sending.',
+  contextUnavailable: 'Choose a confirmed material version and a regular career conversation first.',
+  contextDraftText: 'Please discuss this material. The following is source text.\nMaterial: {title} · {version}\nVersion ID: {versionId}\n\n{text}',
+  error_NATIVE_DRAFT_UNAVAILABLE: 'This DSH host does not provide draft preparation. Update or re-enable the plugin and retry.', error_NATIVE_DRAFT_BLOCKED: 'The conversation is submitting. Try again shortly; your reference is still here.', error_CONTEXT_UNAVAILABLE: 'Use a confirmed material version and start or select a regular career conversation.',
+
   rtSettingsNote: 'Text analysis keeps using the models configured in DSH. These settings are only for the dedicated realtime audio service.', rtSettingsPrivacy: 'Calls send audio and the interview materials to Alibaba Cloud Model Studio in the selected region and may incur service charges.', rtSettingsUnavailable: 'Voice settings are unavailable. Check that the plugin is enabled and try again.',
   rtSettingsEnabled: 'Realtime voice interviews', rtSettingsOn: 'Enabled', rtSettingsOff: 'Disabled', rtSettingsRegion: 'Audio service region', rtSettingsBeijing: 'Mainland China (Beijing)', rtSettingsSingapore: 'International (Singapore)', rtSettingsWorkspace: 'Model Studio workspace ID', rtSettingsWorkspaceHint: 'Enter the workspace ID for your audio service', rtSettingsModel: 'Realtime audio model', rtSettingsAdvanced: 'Advanced options', rtSettingsCredentialRef: 'DSH audio credential name', rtSettingsSave: 'Save voice settings', rtSettingsDiscard: 'Restore saved settings',
   rtSettingsSaved: 'Voice settings saved.', rtSettingsInvalid: 'Check the region, workspace ID, model and credential name.', rtSettingsReadonly: 'This DSH configuration is read-only.', rtSettingsConflict: 'Settings were not saved. The Host configuration may have changed. Restore saved settings and try again.', rtSettingsFailed: 'Voice settings were not saved. Check the DSH connection and try again.',

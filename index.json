@@ -1,0 +1,66 @@
+{
+  "format": 1,
+  "title": {
+    "zh": "职镜AI",
+    "en": "Interview Desk"
+  },
+  "description": {
+    "zh": "职镜AI 自有插件索引。使用固定版本的预构建包安装。",
+    "en": "The Interview Desk plugin index, with prebuilt packages pinned to immutable Git commits."
+  },
+  "metadata": {
+    "categories": {
+      "career": {
+        "title": {
+          "zh": "求职与面试",
+          "en": "Career and interviews"
+        }
+      }
+    }
+  },
+  "plugins": [
+    {
+      "name": "dsh-interview-desk",
+      "title": {
+        "zh": "职镜AI",
+        "en": "Interview Desk"
+      },
+      "description": {
+        "zh": "DSH 原生求职工作台：个人资料、简历分析与修改、文字和语音模拟面试。",
+        "en": "A native DSH career workbench for personal materials, resume review, job fit, text and voice interviews, and reports. Development preview."
+      },
+      "author": "minhaoliu927-lgtm",
+      "homepage": "https://github.com/minhaoliu927-lgtm/dsh-interview-desk#readme",
+      "repository": {
+        "url": "https://github.com/minhaoliu927-lgtm/dsh-interview-desk"
+      },
+      "metadata": {
+        "category": "career",
+        "keywords": [
+          "dsh-plugin",
+          "dsh-interview-desk",
+          "职镜AI",
+          "简历",
+          "求职",
+          "面试",
+          "resume",
+          "interview"
+        ]
+      },
+      "versions": [
+        {
+          "version": "0.1.0-dev.6",
+          "publishTimestamp": 1794491981,
+          "source": {
+            "type": "git",
+            "url": "https://github.com/minhaoliu927-lgtm/dsh-interview-desk",
+            "commit": "844a74521a5ff6b0506c3c069196d1e7812df468"
+          },
+          "engines": {
+            "dsh": "0.2.2-rc.1"
+          }
+        }
+      ]
+    }
+  ]
+}

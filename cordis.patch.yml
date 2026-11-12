@@ -1,4 +1,4 @@
 - insert:
-    - id: dsh-interview
-      name: dsh-interview
+    - id: dsh-interview-desk
+      name: dsh-interview-desk
       config: {}

@@ -1,6 +1,6 @@
 # Third-party notices
 
-The MIT license in `LICENSE` covers original 职镜AI code. It does not replace the licenses of dependencies, adapted third-party code, or the bundled font. This inventory describes `dsh-interview` version `0.1.0-dev.5` and its current package payload.
+The MIT license in `LICENSE` covers original 职镜AI code. It does not replace the licenses of dependencies, adapted third-party code, or the bundled font. This inventory describes `dsh-interview-desk` version `0.1.0-dev.6` and its current package payload.
 
 The README organization was informed by [dsh-Go](https://github.com/ccch1mneyyy/dsh-Go). Its prose, application code, brand artwork and characters are not included; this project's README is independently written.
 

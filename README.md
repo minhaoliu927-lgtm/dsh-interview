@@ -1,14 +1,14 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/brand/logo-white.svg">
-    <img src="assets/brand/logo-black.svg" alt="职镜AI · dsh-interview" width="330" height="96">
+    <img src="assets/brand/logo-black.svg" alt="职镜AI · dsh-interview-desk" width="330" height="96">
   </picture>
 </p>
 
-<h1 align="center">dsh-interview</h1>
+<h1 align="center">dsh-interview-desk</h1>
 <p align="center">在 DSH 里改简历、准备岗位、练习面试。</p>
 <p align="center">
-  <a href="https://github.com/minhaoliu927-lgtm/dsh-interview/releases"><img alt="下载插件" src="https://img.shields.io/badge/GitHub_Releases-下载插件-202724?style=for-the-badge&logo=github"></a>
+  <a href="https://github.com/minhaoliu927-lgtm/dsh-interview-desk/releases"><img alt="下载插件" src="https://img.shields.io/badge/GitHub_Releases-下载插件-202724?style=for-the-badge&logo=github"></a>
   <a href="LICENSE"><img alt="MIT License" src="https://img.shields.io/badge/License-MIT-202724?style=for-the-badge"></a>
 </p>
 <p align="center">
@@ -17,7 +17,7 @@
 
 **职镜AI** 是面向求职者的 DSH 原生插件。个人资料、目标岗位、原生聊天和模拟面试放在同一个工作台，文字分析直接使用 DSH 已配置的模型。
 
-当前公开版本为 **0.1.0-dev.5 开发预览**，提供源码和可安装的 `.tgz`。npm 分发与 DSH 插件索引暂缓，请从本仓库 Release 安装。
+当前版本为 **0.1.0-dev.6 开发预览**，提供源码、自有 DSH 插件索引和 Release `.tgz`。索引使用固定 Git 提交的预构建包，安装不需要 npm 账号；npm 发布暂缓。
 
 ## 可以做什么
 
@@ -41,7 +41,23 @@
 
 已验证宿主基线为 **DSH 0.2.2-rc.1**，需要 Node.js **24.9.0 或更新版本**及 `node:sqlite`。当前验证使用 Windows DSH Desktop，以及连接同一 Host 的 Chrome、Edge。其他宿主版本和平台尚未声明兼容。
 
-1. 打开 [GitHub Releases](https://github.com/minhaoliu927-lgtm/dsh-interview/releases)，在 **Assets** 下载 `dsh-interview-0.1.0-dev.5.tgz`。
+### 在 DSH 搜索安装
+
+1. 打开 DSH 的“插件”，在“实验性插件”中启用“自定义插件索引”。
+2. 切换到“发现”，添加下面的索引地址。
+3. 搜索 `dsh-interview-desk` 或“职镜AI”，打开详情，选择开发预览版本，点击“安装”。安装完成后点击“立即启用”，从侧栏打开“职镜”。
+
+```text
+https://raw.githubusercontent.com/minhaoliu927-lgtm/dsh-interview-desk/main/index.json
+```
+
+这是本项目维护的自有索引，须添加一次。DSH 的发现页搜索已配置的索引；这不表示插件已进入所有用户的默认列表。社区索引的审核与更新由维护者决定。
+
+索引将版本固定到公开的 `plugin-dist` 分支中的完整提交，包含已构建的 Client 和文档解析模块。安装无需运行编译脚本，需要能访问 GitHub 和依赖源。不要直接将源码分支 `main` 当作已构建插件安装。
+
+### 从 Release 安装
+
+1. 打开 [GitHub Releases](https://github.com/minhaoliu927-lgtm/dsh-interview-desk/releases)，在 **Assets** 下载 `dsh-interview-desk-0.1.0-dev.6.tgz`。
 2. 在 DSH 插件管理中选择“添加插件”，将安装包的**绝对路径**填入“包名或地址”，点击“安装”。
 3. 点击“立即启用”，从侧栏打开“职镜”。
 
@@ -54,7 +70,7 @@ GitHub 的 **Source code.zip / tar.gz** 是源码归档，不是插件安装包�
 
 ```powershell
 $env:DSH_HOME = Join-Path (Get-Location) '.runtime/zhijing/dsh'
-dsh plugin --profile interview-test add ./dsh-interview-0.1.0-dev.5.tgz
+dsh plugin --profile interview-test add ./dsh-interview-desk-0.1.0-dev.6.tgz
 dsh --profile interview-test --dump-config
 ```
 
@@ -62,12 +78,12 @@ dsh --profile interview-test --dump-config
 
 </details>
 
-### 从旧名 dsh-zhijing 升级
+### 从旧名 dsh-interview 或 dsh-zhijing 升级
 
-`dsh-interview` 是新的包名和设置标识，中文品牌仍为“职镜AI”。
+`dsh-interview-desk` 是新的包名和设置标识，中文品牌仍为“职镜AI”。
 
 1. 结束当前任务，并记下旧插件的音频地域、业务空间、模型和启用状态。
-2. 在官方插件管理中卸载 `dsh-zhijing`，然后安装并启用新包。**不要同时启用两个名称的插件。**
+2. 在官方插件管理中卸载已安装的 `dsh-interview` 或 `dsh-zhijing`，然后安装并启用新包。**不要同时启用多个名称的插件。**
 3. 在新插件的官方设置中重新保存上述音频选项。默认凭据引用仍为 `ZHIJING_REALTIME_API_KEY`；同一 DSH_HOME 中已有该凭据时，无需重填密钥。曾使用自定义引用的用户应在高级选项中保持原引用。
 
 卸载保留资料；新版本继续使用同一 `DSH_HOME/zhijing` 数据目录、原生会话关联和工具名。设置属于新的包名，因此需要重新保存。备份时请先关闭相关 Host，再保存完整插件数据目录及所需 DSH 会话。
@@ -82,6 +98,12 @@ dsh --profile interview-test --dump-config
 6. 选择简历或报告，导出 DOCX/PDF。
 
 工作台分析使用宿主默认文字模型；原生聊天中的工具使用当前会话选定的模型。模型不能代替你确认事实、OCR 结果或采纳修改。
+
+### 工作台与助手并排使用
+
+顶部“助手”可展开或收起原生聊天。在资料、岗位和分析页面可以保留当前对话；打开完整聊天后可返回工作台。窄窗口默认收起助手，需要时再打开。
+
+在资料正文中选择一段文字，或选择一个已确认的完整版本，点击“交给助手”。先核对可取消的引用卡，再点击“加入对话草稿”。引用会追加到当前 DSH 输入框，保留已有草稿和附件；最后仍由你点击原生“发送消息”。选中内容本身不会请求模型，也不会替换旧面试或报告的资料版本。
 
 ## 实时语音面试
 
@@ -113,9 +135,9 @@ dsh --profile interview-test --dump-config
 ## 常见问题
 
 <details>
-<summary><b>在 DSH 搜索 dsh-interview 就能安装吗？</b></summary>
+<summary><b>在 DSH 搜索 dsh-interview-desk 就能安装吗？</b></summary>
 
-当前请从本仓库 Release 下载 `.tgz` 安装。npm 与插件索引尚未发布，GitHub 公开不代表已被 DSH 搜索收录，也不提供自动构建的 Git URL 安装方式。
+先在“发现”中添加上面的自有索引，再搜索 `dsh-interview-desk` 或“职镜AI”即可找到对应条目。未添加索引时不保证搜索结果。npm 尚未发布，因此“添加插件”中只输入包名的 npm 安装方式暂不可用；也可下载 Release `.tgz` 安装。
 
 </details>
 
@@ -165,8 +187,8 @@ dsh --profile interview-test --dump-config
 需要 Node.js 24.9.0+ 和 pnpm；验证使用 Node.js 24.19.0、pnpm 11.28.5。源码包含字体和材料解析模块，不依赖旧桌面工程。
 
 ```sh
-git clone https://github.com/minhaoliu927-lgtm/dsh-interview.git
-cd dsh-interview
+git clone https://github.com/minhaoliu927-lgtm/dsh-interview-desk.git
+cd dsh-interview-desk
 pnpm install --frozen-lockfile
 node scripts/fetch-font.mjs --verify-only
 pnpm test
@@ -189,17 +211,19 @@ pnpm pack --pack-destination ./release
 
 `scripts/prepare-source.mjs --out <新目录>` 可生成带 SHA-256 清单的干净源码；`--verify <目录>` 核对内容。安装包不包含原项目 Git 历史、运行数据、个人资料或密钥。公开代码不附带可用 API Key，请在自己的宿主中配置。
 
+发布索引时，先将已审计的 `.tgz` 内容提交到 `plugin-dist`，再运行 `node scripts/update-index.mjs <完整提交SHA> <Unix秒>` 更新 `index.json`。每个版本指向不可变提交；源码和构建产物分支分别保留，旧版本不覆盖。
+
 ## 反馈与贡献
 
-欢迎通过 [Issues](https://github.com/minhaoliu927-lgtm/dsh-interview/issues) 提交问题或建议，说明 DSH 版本、平台、操作步骤和已脱敏的错误提示。请勿上传 API Key、完整个人简历、凭据文件或未经检查的日志。
+欢迎通过 [Issues](https://github.com/minhaoliu927-lgtm/dsh-interview-desk/issues) 提交问题或建议，说明 DSH 版本、平台、操作步骤和已脱敏的错误提示。请勿上传 API Key、完整个人简历、凭据文件或未经检查的日志。
 
 ## 许可与致谢
 
 自有代码使用 [MIT](LICENSE)。第三方代码、依赖和字体保留各自许可，详见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
 
 - [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness)：原生宿主与公开扩展接口。
-- [dsh-media-desk](https://github.com/woniuniuniu/dsh-media-desk)：插件安装和宿主集成参考。
+- [dsh-media-desk](https://github.com/woniuniuniu/dsh-media-desk)：自有索引、可收起助手、上下文引用与结果并排交互参考。职镜AI仍使用DSH原生会话与自己的求职业务实现。
 - [dsh-Go](https://github.com/ccch1mneyyy/dsh-Go)：README 的内容组织参考；本仓库文案与品牌素材独立编写。
 - [Noto CJK](https://github.com/notofonts/noto-cjk)：中文 PDF 字体，保留 SIL Open Font License 1.1。
 
-<p align="center"><sub>职镜AI · dsh-interview · 用真实经历准备下一场面试。</sub></p>
+<p align="center"><sub>职镜AI · dsh-interview-desk · 用真实经历准备下一场面试。</sub></p>

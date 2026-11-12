@@ -31,13 +31,13 @@ function fixture() {
 
 test('settings contributes the official bundle slot with a stable ConfigForms/credential face and disposes it', () => {
   const f = fixture(); let registration, component, removed = false;
-  const ctx = { get(name) { return name === 'configForms' ? { get(ns) { assert.equal(ns, 'dsh-interview'); return f.form; } }
+  const ctx = { get(name) { return name === 'configForms' ? { get(ns) { assert.equal(ns, 'dsh-interview-desk'); return f.form; } }
     : name === 'remote.credentials' ? f.credentials : undefined; },
     slots: { inject(name, callback) { assert.equal(name, 'plugins.bundle.config'); return callback(); }, register(options, view) {
       registration = options; component = view; return () => { removed = true; };
     } } };
   const dispose = ui.registerRealtimeSettings(ctx, 'zhijing');
-  assert.equal(registration.key, 'dsh-interview'); assert.equal(registration.locale, 'zhijing'); assert.equal(component, ui.RealtimeSettings);
+  assert.equal(registration.key, 'dsh-interview-desk'); assert.equal(registration.locale, 'zhijing'); assert.equal(component, ui.RealtimeSettings);
   const face = registration.inject(); assert.equal(face, registration.inject()); assert.equal(face.describeCredential, registration.inject().describeCredential);
   assert.equal(face.hooks.realtimeSettings, f.form); assert.equal(f.calls.length, 0);
   dispose(); assert.equal(removed, true);

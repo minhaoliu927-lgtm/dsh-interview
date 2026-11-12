@@ -162,9 +162,9 @@ export function createRealtimeProbe({ testAudio, cancelAudio }, {
 export function registerRealtimeSettings(ctx, namespace) {
   let binding;
   return ctx.slots.inject('plugins.bundle.config', () => ctx.slots.register({
-    name: 'plugins.bundle.config', key: 'dsh-interview', locale: namespace,
+    name: 'plugins.bundle.config', key: 'dsh-interview-desk', locale: namespace,
     inject: () => {
-      const form = ctx.get('configForms')?.get('dsh-interview'), credentials = ctx.get('remote.credentials') ?? ctx.get('remote')?.credentials;
+      const form = ctx.get('configForms')?.get('dsh-interview-desk'), credentials = ctx.get('remote.credentials') ?? ctx.get('remote')?.credentials;
       if (!binding || binding.form !== form || binding.credentials !== credentials) binding = { form, credentials, actions: createRealtimeSettingsActions(form, credentials) };
       return binding.actions;
     },

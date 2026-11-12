@@ -1,6 +1,6 @@
 {
-  "name": "dsh-interview",
-  "version": "0.1.0-dev.5",
+  "name": "dsh-interview-desk",
+  "version": "0.1.0-dev.6",
   "description": "DSH 原生求职工作台：个人资料、简历分析与修改、文字和语音模拟面试。",
   "type": "module",
   "license": "MIT",
@@ -30,7 +30,7 @@
   },
   "keywords": [
     "dsh-plugin",
-    "dsh-interview",
+    "dsh-interview-desk",
     "deepseek-harness",
     "resume",
     "interview"
@@ -71,10 +71,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/minhaoliu927-lgtm/dsh-interview.git"
+    "url": "git+https://github.com/minhaoliu927-lgtm/dsh-interview-desk.git"
   },
   "bugs": {
-    "url": "https://github.com/minhaoliu927-lgtm/dsh-interview/issues"
+    "url": "https://github.com/minhaoliu927-lgtm/dsh-interview-desk/issues"
   },
-  "homepage": "https://github.com/minhaoliu927-lgtm/dsh-interview#readme"
+  "homepage": "https://github.com/minhaoliu927-lgtm/dsh-interview-desk#readme"
 }

@@ -35,7 +35,7 @@ test('workbench registers only native public slots and disposes every contributi
     sessions: {}, workspaces: { list: { getSnapshot: () => ({ items: [] }) } }, effect(install) { effects.push(install()); },
   };
   plugin.apply(ctx);
-  assert.deepEqual([...entries.keys()].sort(), ['main:zhijing', 'plugins.bundle.config:dsh-interview', 'sidebar.panellist:zhijing', 'zhijing.conversation:']);
+  assert.deepEqual([...entries.keys()].sort(), ['main:zhijing', 'plugins.bundle.config:dsh-interview-desk', 'sidebar.panellist:zhijing', 'zhijing.conversation:']);
   assert.equal(entries.get('main:zhijing').options.children['zhijing.conversation'].scope, 'session');
   assert.deepEqual(Object.keys(entries.get('main:zhijing').options.children), ['zhijing.conversation']);
   assert.equal(resourceCount, 1); assert.equal(localeCount, 1);

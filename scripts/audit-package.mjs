@@ -76,7 +76,7 @@ async function collect(root, selected) {
 export async function auditPackage({ root = packageRoot, packFiles, checkInstalledDependencies = true } = {}) {
   root = await realpath(root);
   const pkg = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
-  if (pkg.name !== 'dsh-interview' || pkg.license !== 'MIT') error('PACKAGE_IDENTITY', 'Expected dsh-interview with an original-code MIT license');
+  if (pkg.name !== 'dsh-interview-desk' || pkg.license !== 'MIT') error('PACKAGE_IDENTITY', 'Expected dsh-interview-desk with an original-code MIT license');
   if (!Array.isArray(pkg.files) || pkg.files.some(item => typeof item !== 'string' || /[*?]/.test(item))) error('UNBOUNDED_PACKAGE_FILES', 'Use explicit package directories and files');
   if (pkg.bundleDependencies === true || pkg.bundledDependencies === true || pkg.bundleDependencies?.length || pkg.bundledDependencies?.length) error('UNREVIEWED_BUNDLED_DEPENDENCIES', 'Dependency trees require a separate license inventory');
   const paths = await collect(root, packFiles ?? [...new Set([...pkg.files, 'package.json', 'LICENSE', 'README.md'])]);
